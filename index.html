@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TODO</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --surface2: #22222f;
+      --border: #2e2e3e;
+      --accent: #7c6aff;
+      --accent-hover: #9d8fff;
+      --danger: #ff6b6b;
+      --text: #e2e2f0;
+      --text-muted: #6b6b8a;
+      --done-text: #44445a;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 48px 16px 80px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 32px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Input */
+    .add-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .add-form input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .add-form input::placeholder { color: var(--text-muted); }
+
+    .add-form input:focus { border-color: var(--accent); }
+
+    .add-form button {
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      line-height: 1;
+    }
+
+    .add-form button:hover { background: var(--accent-hover); }
+    .add-form button:active { transform: scale(0.95); }
+
+    /* Filter tabs */
+    .filters {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+    }
+
+    .filters button {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-radius: 9px;
+      padding: 9px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .filters button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* Stats */
+    .stats {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    /* List */
+    .todo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      transition: border-color 0.15s, opacity 0.2s;
+      animation: slideIn 0.18s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .todo-item:hover { border-color: var(--border); }
+    .todo-item.done  { opacity: 0.55; }
+
+    /* Checkbox */
+    .check-btn {
+      width: 22px; height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .todo-item.done .check-btn {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Text area */
+    .todo-text-wrap { flex: 1; min-width: 0; }
+
+    .todo-text {
+      font-size: 15px;
+      color: var(--text);
+      word-break: break-word;
+      cursor: text;
+    }
+
+    .todo-item.done .todo-text {
+      color: var(--done-text);
+      text-decoration: line-through;
+    }
+
+    .todo-edit-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--accent);
+      outline: none;
+      font-size: 15px;
+      color: var(--text);
+      padding: 2px 0;
+    }
+
+    .todo-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Delete */
+    .del-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 6px;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .todo-item:hover .del-btn { opacity: 1; }
+    .del-btn:hover { color: var(--danger); }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .empty span { display: block; font-size: 40px; margin-bottom: 12px; }
+
+    /* Clear completed */
+    .clear-btn {
+      display: block;
+      margin: 16px auto 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>TODO</h1>
+
+  <form class="add-form" id="addForm">
+    <input type="text" id="newTask" placeholder="新しいタスクを入力..." autocomplete="off" />
+    <button type="submit">＋</button>
+  </form>
+
+  <div class="filters">
+    <button class="active" data-filter="all">すべて</button>
+    <button data-filter="active">未完了</button>
+    <button data-filter="done">完了済み</button>
+  </div>
+
+  <p class="stats" id="stats"></p>
+  <div class="todo-list" id="todoList"></div>
+  <button class="clear-btn" id="clearBtn" style="display:none">完了済みを削除</button>
+</div>
+
+<script>
+  const STORAGE_KEY = 'todo-app-v1';
+  let todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  let filter = 'all';
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+  }
+
+  function render() {
+    const list = document.getElementById('todoList');
+    const stats = document.getElementById('stats');
+    const clearBtn = document.getElementById('clearBtn');
+
+    const visible = todos.filter(t =>
+      filter === 'all' ? true : filter === 'done' ? t.done : !t.done
+    );
+
+    const total = todos.length;
+    const done = todos.filter(t => t.done).length;
+    const active = total - done;
+
+    stats.textContent = total === 0 ? '' : `${active} 件未完了 / 全 ${total} 件`;
+    clearBtn.style.display = done > 0 ? 'block' : 'none';
+
+    if (visible.length === 0) {
+      const msgs = { all: ['📋', 'タスクがありません'], active: ['✅', '未完了のタスクはありません'], done: ['🌟', '完了済みタスクはありません'] };
+      const [icon, msg] = msgs[filter];
+      list.innerHTML = `<div class="empty"><span>${icon}</span>${msg}</div>`;
+      return;
+    }
+
+    list.innerHTML = '';
+    visible.forEach(todo => {
+      const item = document.createElement('div');
+      item.className = 'todo-item' + (todo.done ? ' done' : '');
+      item.dataset.id = todo.id;
+
+      const dateStr = new Date(todo.createdAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      item.innerHTML = `
+        <button class="check-btn" title="完了切替">${todo.done ? '✓' : ''}</button>
+        <div class="todo-text-wrap">
+          <div class="todo-text" title="ダブルクリックで編集">${escHtml(todo.text)}</div>
+          <div class="todo-date">${dateStr}</div>
+        </div>
+        <button class="del-btn" title="削除">✕</button>
+      `;
+
+      // Toggle done
+      item.querySelector('.check-btn').addEventListener('click', () => {
+        todo.done = !todo.done;
+        save(); render();
+      });
+
+      // Delete
+      item.querySelector('.del-btn').addEventListener('click', () => {
+        todos = todos.filter(t => t.id !== todo.id);
+        save(); render();
+      });
+
+      // Inline edit on double-click
+      const textEl = item.querySelector('.todo-text');
+      textEl.addEventListener('dblclick', () => startEdit(textEl, todo));
+
+      list.appendChild(item);
+    });
+  }
+
+  function startEdit(el, todo) {
+    const input = document.createElement('input');
+    input.className = 'todo-edit-input';
+    input.value = todo.text;
+    el.replaceWith(input);
+    input.focus();
+    input.select();
+
+    function commit() {
+      const val = input.value.trim();
+      if (val) todo.text = val;
+      save(); render();
+    }
+
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); commit(); }
+      if (e.key === 'Escape') render();
+    });
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Add
+  document.getElementById('addForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = document.getElementById('newTask');
+    const text = input.value.trim();
+    if (!text) return;
+    todos.unshift({ id: Date.now(), text, done: false, createdAt: Date.now() });
+    input.value = '';
+    save(); render();
+  });
+
+  // Filters
+  document.querySelectorAll('.filters button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      filter = btn.dataset.filter;
+      document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    });
+  });
+
+  // Clear completed
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (confirm('完了済みのタスクをすべて削除しますか？')) {
+      todos = todos.filter(t => !t.done);
+      save(); render();
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>
