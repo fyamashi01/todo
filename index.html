@@ -246,7 +246,7 @@
 </head>
 <body>
 <div class="app">
-  <h1>TODO</h1>
+  <h1>TODO ver.2 <span id="todayDate" style="font-size:1rem; font-weight:400;"></span></h1>
 
   <form class="add-form" id="addForm">
     <input type="text" id="newTask" placeholder="新しいタスクを入力..." autocomplete="off" />
@@ -386,6 +386,12 @@
       save(); render();
     }
   });
+
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  document.getElementById('todayDate').textContent = `${y}/${m}/${d}`;
 
   render();
 </script>
